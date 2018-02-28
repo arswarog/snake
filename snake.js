@@ -32,7 +32,7 @@ let game={
 			}
 		}
 		for (let i of this.snake){
-			$(`#${i}-${k}`).css("background-color","black");
+			$(`#i-i`).css("background-color","black");
 			console.log(i);
 		}
 	}
