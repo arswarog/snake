@@ -1,0 +1,9 @@
+
+table{
+	border: solid 0.1em black;
+}
+td{
+	background-color: #E7E7E7;
+	width: 1em;
+	height: 1em;
+}
