@@ -12,6 +12,7 @@ let game={
 		}
 		this.snake[0]={x:1,y:2};
 	},
+	// создаем поле
 	table: function(){
 		document.write("<table>");
 		for (i=0;i<this.width;i++){
@@ -23,16 +24,17 @@ let game={
 		}
 		document.write("</table>");
 	},
+	// отображение тела змейки
 	view: function(){
-		for (i=0;i<10;i++){
-			for (k=0;k<10;k++){
+		for (i=0;i<20;i++){
+			for (k=0;k<20;k++){
 				if (this.pole[i][k]){
 					$(`#${i}-${k}`).css("background-color","green");
 				}
 			}
 		}
 		for (let i of this.snake){
-			$(`#${i}-${k}`).css("background-color","black");
+			$(`#${i.x}-${i.y}`).css("background-color","black");
 			console.log(i);
 		}
 	}
