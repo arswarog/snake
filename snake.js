@@ -28,9 +28,9 @@ let game = {
     // создаем поле
     table: function () {
         document.write('<table>');
-        for (let x = 0; x < this.width; x++) {
+        for (let y = 0; y < this.height; y++) {
             document.write('<tr>')
-            for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
                 document.write(`<td id="${x}-${y}"></td>`);
             }
             document.write('</tr>');
@@ -67,6 +67,23 @@ let game = {
         }
     },
 
+    keyboard: function (key) {
+        switch (key) {
+            case 'ArrowUp':
+                this.direction = 2;
+                break;
+            case 'ArrowDown':
+                this.direction = 3;
+                break;
+            case 'ArrowLeft':
+                this.direction = 0;
+                break;
+            case 'ArrowRight':
+                this.direction = 1;
+                break;
+        }
+    },
+
     iteration: function () {
         // создаем новую голову с координатами старой
         let head = {
@@ -91,7 +108,7 @@ let game = {
         }
 
         // поочередно сдвигаем координаты в теле
-        for (let i = this.snake.length-1; i > 0; i--)
+        for (let i = this.snake.length - 1; i > 0; i--)
             this.snake[i] = this.snake[i - 1];
 
         // и теперь устанавливаем "новую" голову
@@ -104,6 +121,11 @@ let game = {
 game.init();
 game.table();
 game.view();
+
 setInterval(function () {
     game.iteration()
 }, 500);
+
+document.addEventListener('keydown', function (event) {
+    game.keyboard(event.key);
+}, false);
