@@ -1,19 +1,76 @@
-let game = {
-    pole     : [],
-    snake    : [],
-    width    : 20,
-    height   : 20,
-    direction: 0,
+let ItemType = {
+	None: 'none',
+	Head: 'head',
+	Snake: 'snake',
+	Portal: 'portal',
+	Food: 'food',
+}
 
-    init: function () {
-        // Обнуляем все поле
-        for (let x = 0; x < this.width; x++) {
-            this.pole[x] = [];
-            for (let y = 0; y < this.height; y++) {
-                this.pole[x][y] = 0;
+class MapItem {
+	constructor(map, td) {
+		this._element = td;
+		this._type = ItemType.None;
+	}
+	
+	set type(value) {
+		this._type = value;
+		this._element.className = value;
+	}
+	
+	get type() {
+		return this._type;
+	}
+}
+
+class Map {
+	constructor(id, width, height) {
+		this.width = width;
+		this.height = height;
+			
+		this._map = document.createElement('table');
+		let parent = document.getElementById(id);
+		parent.appendChild(this._map);
+		
+		this.table();
+	}
+
+    // создаем поле
+    table() {
+		let tbody = document.createElement('tbody');
+		this._map.appendChild(tbody);
+		
+		this.map = [];
+		this.map.length = this.width;
+		for (let i = 0; i < this.width; i++)
+			this.map[i] = [];
+		
+        for (let y = 0; y < this.height; y++) {
+			let tr = document.createElement('tr');
+			tbody.appendChild(tr);
+            for (let x = 0; x < this.width; x++) {
+				let td = document.createElement('td');
+				tr.appendChild(td);
+				this.map[x][y] = new MapItem(this, td);
             }
         }
+	}
+}
+class Game {
+	constructor(id, width, height) {
+		this.pole      = null;
+		this.snake     = [];
+		this.width     = 20;
+		this.height    = 20;
+		this.direction = 0;
+		this.timer     = null;
+		this.level     = 1;
+		
+		this.init(id);
+	}
 
+    init(id) {		
+		this.pole = new Map(id, this.width, this.height);
+		
         // получаем случайные координаты для головы змеи
         // но делаем отступ от края на 2 ячейки
         // что бы она сразу не врезалась в стену
@@ -23,35 +80,40 @@ let game = {
         this.snake[1]  = {x: x, y: y};
         this.direction = Math.floor(Math.random() * 4);
         this.iteration();
-    },
-
-    // создаем поле
-    table: function () {
-        document.write('<table>');
-        for (let y = 0; y < this.height; y++) {
-            document.write('<tr>')
-            for (let x = 0; x < this.width; x++) {
-                document.write(`<td id="${x}-${y}"></td>`);
-            }
-            document.write('</tr>');
-        }
-        document.write('</table>');
-    },
-
-    // функция для задания цвета отдельной ячейки
-    setColor: function (x, y, color) {
-        $(`#${x}-${y}`).css('background-color', color);
-    },
+		
+		this.addFood(30);
+    }
+	
+	addFood(count) {
+		if (count == void 0) count = 1;
+		
+		for (let i = 0; i < count; i++) {
+			let fail, x, y;
+			do {
+				fail = false;
+				x = Math.floor(Math.random() * this.width);
+				y = Math.floor(Math.random() * this.height);
+				if (this.pole.map[x][y].type !== ItemType.None) continue;
+				this.snake.forEach(item => {
+					if (item.x === x && item.y === y) fail = true;
+				});
+			} while (fail);
+			this.pole.map[x][y].type = ItemType.Food;
+		}
+    }
 
     // отображение тела змейки
-    view: function () {
+    view() {
+		return;
         // перерисовываем поле
-        for (x = 0; x < this.width; x++) {
-            for (y = 0; y < this.height; y++) {
-                let color = '#f5f5f5';
-                if (this.pole[x][y])
-                    color = '#097054';
-                this.setColor(x, y, color);
+        for (let x = 0; x < this.width; x++) {
+            for (let y = 0; y < this.height; y++) {
+                let type = ItemType.None;
+                if (this.pole.map[x][y].type === ItemType.Food)
+                    type = ItemType;
+                if (this.pole.map[x][y].type === ItemType.Portal)
+                    type = 'portal';
+                this.pole.map[x][y].type = type;
             }
         }
 
@@ -60,72 +122,114 @@ let game = {
             let item = this.snake[i];
             if (i > 0)
             // Тело змейки
-                this.setColor(item.x, item.y, '#ff9900');
+                this.setColor(item.x, item.y, 'snake');
             else
             // Голова змейки
-                this.setColor(item.x, item.y, '#6599ff');
+                this.setColor(item.x, item.y, 'head');
         }
-    },
+    }
 
-    keyboard: function (key) {
+    keyboard(key) {
         switch (key) {
             case 'ArrowUp':
-                this.direction = 2;
-                break;
-            case 'ArrowDown':
-                this.direction = 3;
-                break;
-            case 'ArrowLeft':
                 this.direction = 0;
                 break;
             case 'ArrowRight':
                 this.direction = 1;
                 break;
+            case 'ArrowDown':
+                this.direction = 2;
+                break;
+            case 'ArrowLeft':
+                this.direction = 3;
+                break;
         }
-    },
+    }
 
-    iteration: function () {
+    iteration() {
+		this.move();
+		
+		if (this.snake.length > 10) {
+			//this.snake.length = 5;
+			//this.levelUp();
+		}
+		
+        this.view();
+	}
+	
+	levelUp() {
+		this.level++;
+		console.log('Level up to level ' + this.level);
+		this.start();
+	}
+	
+	move(reversed) {
         // создаем новую голову с координатами старой
         let head = {
             x: this.snake[0].x,
             y: this.snake[0].y
         }
+		
+		console.log(head);
 
         // пересчитываем координаты головы с учетом направления движения
         switch (this.direction) {
             case 0:
-                head.x--;
+                head.y--;
                 break;
             case 1:
                 head.x++;
                 break;
             case 2:
-                head.y--;
-                break;
-            case 3:
                 head.y++;
                 break;
+            case 3:
+                head.x--;
+                break;
         }
+		
+		if (head.x === this.width) head.x = 0;
+		if (head.x < 0) head.x = this.width - 1;
+		if (head.y === this.height) head.y = 0;
+		if (head.y < 0) head.y = this.height - 1;
+		
+		if (head.x === this.snake[1].x && head.y === this.snake[1].y) {
+			if (reversed) {
+				console.log(1, this.direction);
+				this.direction = (this.direction + 2) % 4;
+				console.log(2, this.direction);
+				return this.move();
+			} else {
+				this.snake.reverse();
+				return this.move(true);
+			}
+		}
+		
+		if (this.pole.map[head.x][head.y].type === ItemType.Food) {
+			this.pole.map[head.x][head.y].type = ItemType.None;
+			this.addFood();
+			this.snake.push(null);
+		}
 
-        // поочередно сдвигаем координаты в теле
-        for (let i = this.snake.length - 1; i > 0; i--)
-            this.snake[i] = this.snake[i - 1];
-
-        // и теперь устанавливаем "новую" голову
-        this.snake[0] = head;
-
-        // вот и все. пора отображать
-        this.view();
+        this.snake.unshift(head);
+		let tail = this.snake.pop();
+		if (tail)
+			this.pole.map[tail.x][tail.y].type = ItemType.None;
+		
+		this.pole.map[head.x][head.y].type = ItemType.Head;
+		this.pole.map[this.snake[1].x][this.snake[1].y].type = ItemType.Snake;
     }
+	
+	start() {
+		if (this.timer)
+			clearInterval(this.timer);
+		
+		this.timer = setInterval(() => this.iteration(), Math.round(500 / this.level));
+	}
 };
-game.init();
-game.table();
+
+let game = new Game('snake', 10, 10);
 game.view();
+game.start();
 
-setInterval(function () {
-    game.iteration()
-}, 500);
-
-document.addEventListener('keydown', function (event) {
-    game.keyboard(event.key);
-}, false);
+document.addEventListener('keydown', (event) => game.keyboard(event.key), false);
