@@ -1,9 +1,28 @@
-
 table{
 	border: solid 0.1em black;
 }
-td{
+
+table td{
 	background-color: #E7E7E7;
 	width: 1em;
 	height: 1em;
+	border: none;
+	transition: top 1s ease-out 0.5s;
 }
+
+table td.head {
+	background-color: #6599ff;
+}
+
+table td.snake {
+	background-color: #ff9900;
+}
+
+table td.portal {
+	background-color: #D4AF37;
+}
+
+table td.food {
+	background-color: #097054;
+}
+
