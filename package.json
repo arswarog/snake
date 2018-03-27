@@ -1,0 +1,42 @@
+{
+  "name": "snake-reload",
+  "version": "0.1.0",
+  "description": "Alternative snake",
+  "main": "dist/server.js",
+  "scripts": {
+    "start": "node ./dist/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon --watch dist/* dist/index.js",
+    "build": "gulp build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arswarog/snake.git"
+  },
+  "author": "Arswarog <arswarog@yandex.ru>",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/arswarog/snake/issues"
+  },
+  "homepage": "https://github.com/arswarog/snake#readme",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "config": "^1.30.0",
+    "express": "^4.16.3",
+    "express-ws": "^3.0.0",
+    "ts-node": "^5.0.1",
+    "typescript": "^2.7.2"
+  },
+  "devDependencies": {
+    "browserify": "^16.1.1",
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.1",
+    "gulp-htmlmin": "^4.0.0",
+    "gulp-sass": "^3.1.0",
+    "gulp-typescript": "^4.0.1",
+    "gulp-uglify": "^3.0.0",
+    "nodemon": "^1.17.2",
+    "tsify": "^3.0.4",
+    "vinyl-source-stream": "^2.0.0"
+  }
+}
